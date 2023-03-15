@@ -22,49 +22,65 @@ def get_value(grid):
     for i in range(6):
         for j in range(4):
             if (grid[i][j]==0 or grid[i][j]==1) and (grid[i][j+1]==0 or grid[i][j+1]==1) and (grid[i][j+2]==0 or grid[i][j+2]==1) and (grid[i][j+3]==0 or grid[i][j+3]==1):
-                j1+=1
+                for h in range(4):
+                    if grid[i][j+h]==1:
+                        j1+=1
                 
     #vérifie les lignes de manières horizontal pour le j2
     for i in range(6):
         for j in range(4):
             if (grid[i][j]==0 or grid[i][j]==2) and (grid[i][j+1]==0 or grid[i][j+1]==2) and (grid[i][j+2]==0 or grid[i][j+2]==2) and (grid[i][j+3]==0 or grid[i][j+3]==2):
-                j2+=1
+                for h in range(4):
+                    if grid[i][j+h]==2:
+                        j2+=1
 
     #vérifie verticalement pour le j1
     for i in range(7):
         for j in range(3):
             if (grid[j][i]==0 or grid[j][i]==1) and (grid[j+1][i]==0 or grid[j+1][i]==1) and (grid[j+2][i]==0 or grid[j+2][i]==1) and (grid[j+3][i]==0 or grid[j+3][i]==1):
-                j1+=1
+                for h in range(4):
+                    if grid[j+h][i]==1:
+                        j1+=1
     
     #vérifie verticalement pour le j2
     for i in range(7):
         for j in range(3):
             if (grid[j][i]==0 or grid[j][i]==2) and (grid[j+1][i]==0 or grid[j+1][i]==2) and (grid[j+2][i]==0 or grid[j+2][i]==2) and (grid[j+3][i]==0 or grid[j+3][i]==2):
-                j2+=1
+                for h in range(4):
+                    if grid[j+h][i]==2:
+                        j2+=1
 
     #vérifie diagonalement1 pour le j1
     for i in range(4):
         for j in range(3):
             if (grid[j][i]==0 or grid[j][i]==1) and (grid[j+1][i+1]==0 or grid[j+1][i+1]==1) and (grid[j+2][i+2]==0 or grid[j+2][i+2]==1) and (grid[j+3][i+3]==0 or grid[j+3][i+3]==1):
-                j1+=1
+                for h in range(4):
+                    if grid[j+h][i+h]==1:
+                        j1+=1
     
     #vérifie diagonalement1 pour le j2
     for i in range(4):
         for j in range(3):
             if (grid[j][i]==0 or grid[j][i]==2) and (grid[j+1][i+1]==0 or grid[j+1][i+1]==2) and (grid[j+2][i+2]==0 or grid[j+2][i+2]==2) and (grid[j+3][i+3]==0 or grid[j+3][i+3]==2):
-                j2+=1
+                for h in range(4):
+                    if grid[j+h][i+h]==2:
+                        j2+=1
 
     #vérifie diagonalement2 pour le j1
     for i in range(3,7):
         for j in range(3):
             if (grid[j][i]==0 or grid[j][i]==1) and (grid[j+1][i-1]==0 or grid[j+1][i-1]==1) and (grid[j+2][i-2]==0 or grid[j+2][i-2]==1) and (grid[j+3][i-3]==0 or grid[j+3][i-3]==1):
-                j1+=1
+                for h in range(4):
+                    if grid[j+h][i-h]==1:
+                        j1+=1
     
     #vérifie diagonalement2 pour le j2
     for i in range(3,7):
         for j in range(3):
             if (grid[j][i]==0 or grid[j][i]==2) and (grid[j+1][i-1]==0 or grid[j+1][i-1]==2) and (grid[j+2][i-2]==0 or grid[j+2][i-2]==2) and (grid[j+3][i-3]==0 or grid[j+3][i-3]==2):
-                j2+=1
+                for h in range(4):
+                    if grid[j+h][i-h]==2:
+                        j2+=1
 
     
     return j1-j2
@@ -78,6 +94,7 @@ def get_result(grid):
     for i in grid:
         if 0 in i:
             pomme=False
+            break
     if pomme:
         result=None
 
@@ -162,25 +179,23 @@ def main(grid,tree,deepmax,tour):
                 grid[move[1]][move[0]]=2
 
             main(grid,child,deepmax=deepmax,tour=tour+1)
-
             if tour%2==0:
                 grid[move[1]][move[0]]=0
             else:
                 grid[move[1]][move[0]]=0
 
         #trouve à partir des enfants la valeur du move
-        if tour%2==0:
+        if tour%2==1:
             values = []
             for child in tree.children:
                 values.append(child.move_value)
-            values.sort()
-            tree.move_value = values[-1]
+            tree.move_value = min(values)
         else:
             values = []
             for child in tree.children:
                 values.append(child.move_value)
-            values.sort()
-            tree.move_value = values[0]
+            #print(values)
+            tree.move_value = max(values)
     
     #si le bot gagne
     elif r==1:
@@ -188,6 +203,8 @@ def main(grid,tree,deepmax,tour):
     #si le bot perd
     elif r==2:
         tree.move_value=-1000
+    elif r==None:
+        tree.move_value=0
     else:
         tree.move_value = tree.value
         
@@ -209,10 +226,9 @@ starter = int(x)
 
 
 tree = TreeNode([100,-100])
-main(grid,tree,deepmax=1,tour=starter)
+main(grid,tree,deepmax=2,tour=starter)
 
 
-deepmax=4
 pomme=False
 if starter==0:
     pomme=True
@@ -223,6 +239,7 @@ while True:
     else:
         for i in grid:
             print(i)
+        print(get_value(grid))
         r =get_result(grid)
         if r==1:
             print("j'ai gagné")
@@ -236,7 +253,7 @@ while True:
 
         x = input("entrez votre coup\n")
         #!!!vérifiez la disponibilité de la ligne
-        while not x.isdigit() and not 0<int(x)<=7:
+        while not x.isdigit() and not 0<int(x)<=7 :
             x = input("entrez un coup valide\n")
         x=int(x)-1
         temp=None
@@ -247,13 +264,18 @@ while True:
         #print(tree.move)
         grid[temp[1]][temp[0]]=2
         starter+=1
-
-    main(grid,tree,deepmax=deepmax,tour=starter)
+    for i in range(100):
+        if len(tree.children)**(i+1)>20000:
+            deepmax=i
+            break
+    deepmax=5
+    main(grid,tree,deepmax=deepmax,tour=0)
 
 
     
     for i in grid:
         print(i)
+    print(get_value(grid))
     r =get_result(grid)
     if r==1:
         print("j'ai gagné")
@@ -266,18 +288,19 @@ while True:
         break
 
 
-    max=-10000
+    maxi=-10000
+    move=6666
     for child in tree.children:
         print(child.move_value)
         print(child.value)
         print(child.move)
-        if child.move_value>max:
-            max=child.move_value
+        if child.move_value>maxi:
+            maxi=child.move_value
             #print("truc: "+str(child.move))
             move=child.move
     
     print(move[0]+1)
     tree=TreeNode(move,deep=0)
     grid[move[1]][move[0]]=1
-    main(grid,tree,deepmax=deepmax,tour=starter)
+    main(grid,tree,deepmax=1,tour=0)
     starter+=1
