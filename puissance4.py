@@ -160,7 +160,7 @@ class TreeNode:
             self.children.append(child)
 
 
-def main(grid,tree,deepmax,tour):
+def main(grid,tree,deepmax,tour,bot):
     #évaluation de la position
     tree.value=get_value(grid)
 
@@ -173,29 +173,27 @@ def main(grid,tree,deepmax,tour):
     if not tree.deep==deepmax and r==0:
         for child in tree.children:
             move = child.move
-            if tour%2==0:
+            if tour%2==bot:
                 grid[move[1]][move[0]]=1
             else:
                 grid[move[1]][move[0]]=2
 
-            main(grid,child,deepmax=deepmax,tour=tour+1)
-            if tour%2==0:
-                grid[move[1]][move[0]]=0
-            else:
-                grid[move[1]][move[0]]=0
+            main(grid,child,deepmax=deepmax,tour=tour+1,bot=bot)
+            
+            grid[move[1]][move[0]]=0
 
         #trouve à partir des enfants la valeur du move
-        if tour%2==1:
-            values = []
-            for child in tree.children:
-                values.append(child.move_value)
-            tree.move_value = min(values)
-        else:
+        if tour%2==bot:
             values = []
             for child in tree.children:
                 values.append(child.move_value)
             #print(values)
             tree.move_value = max(values)
+        else:
+            values = []
+            for child in tree.children:
+                values.append(child.move_value)
+            tree.move_value = min(values)
     
     #si le bot gagne
     elif r==1:
@@ -224,10 +222,8 @@ while x!="0" and x!="1":
 
 starter = int(x)
 
-
 tree = TreeNode([100,-100])
-main(grid,tree,deepmax=2,tour=starter)
-
+main(grid,tree,deepmax=3,tour=0,bot=1)
 
 pomme=False
 if starter==0:
@@ -239,7 +235,7 @@ while True:
     else:
         for i in grid:
             print(i)
-        print(get_value(grid))
+        #print(get_value(grid))
         r =get_result(grid)
         if r==1:
             print("j'ai gagné")
@@ -253,29 +249,26 @@ while True:
 
         x = input("entrez votre coup\n")
         #!!!vérifiez la disponibilité de la ligne
-        while not x.isdigit() and not 0<int(x)<=7 :
+        while not x.isdigit() and not 0<x<=7 :
             x = input("entrez un coup valide\n")
         x=int(x)-1
         temp=None
         for child in tree.children:
             if child.move[0]==x:
                 temp=child.move
-        tree=TreeNode(temp,deep=0)
         #print(tree.move)
         grid[temp[1]][temp[0]]=2
-        starter+=1
     for i in range(100):
-        if len(tree.children)**(i+1)>20000:
+        if len(tree.children)**(i+1)>100000:
             deepmax=i
             break
-    deepmax=5
-    main(grid,tree,deepmax=deepmax,tour=0)
-
-
+    print(deepmax)
+    tree = TreeNode(None)
+    main(grid,tree,deepmax=deepmax,tour=0,bot=0)
     
     for i in grid:
         print(i)
-    print(get_value(grid))
+    #print(get_value(grid))
     r =get_result(grid)
     if r==1:
         print("j'ai gagné")
@@ -288,19 +281,19 @@ while True:
         break
 
 
-    maxi=-10000
-    move=6666
+    max_move_value=-1000000
+    max_value=-1000000
     for child in tree.children:
-        print(child.move_value)
+        """print(child.move_value)
         print(child.value)
-        print(child.move)
-        if child.move_value>maxi:
-            maxi=child.move_value
+        print(child.move)"""
+        if child.move_value>max_move_value or (child.move_value==max_move_value and child.value>max_value):
+            max_move_value=child.move_value
+            max_value=child.value
             #print("truc: "+str(child.move))
             move=child.move
     
     print(move[0]+1)
     tree=TreeNode(move,deep=0)
     grid[move[1]][move[0]]=1
-    main(grid,tree,deepmax=1,tour=0)
-    starter+=1
+    main(grid,tree,deepmax=1,tour=0,bot=0)
